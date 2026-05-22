@@ -1,5 +1,5 @@
 import LandingPage from './LandingPage';
-himport React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Play, Pause, Square, Clock, Flame, Menu, X,
   ChevronRight, Crown, Leaf, LogOut, Eye, EyeOff
