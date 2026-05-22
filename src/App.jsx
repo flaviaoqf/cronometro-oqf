@@ -558,6 +558,7 @@ export default function CronometroOQF() {
   const [activeTab, setActiveTab] = useState('cronômetro');
   const [showSessionRecovery, setShowSessionRecovery] = useState(false);
   const [toast, setToast] = useState(null);
+    const [showAuth, setShowAuth] = useState(false);
   const timerRef = useRef(null);
 
   // Monitorar autenticação
@@ -689,7 +690,6 @@ export default function CronometroOQF() {
     );
   }
 
-    const [showAuth, setShowAuth] = useState(false);
     if (!user && !showAuth) return <LandingPage onStart={() => setShowAuth(true)} />;
 
   return (
