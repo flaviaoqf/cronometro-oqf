@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import LandingPage from './LandingPage';
+himport React, { useState, useEffect, useRef } from 'react';
 import {
   Play, Pause, Square, Clock, Flame, Menu, X,
   ChevronRight, Crown, Leaf, LogOut, Eye, EyeOff
@@ -689,7 +690,8 @@ export default function CronometroOQF() {
     );
   }
 
-  if (!user) return <AuthScreen />;
+    const [showAuth, setShowAuth] = useState(false);
+    if (!user && !showAuth) return <LandingPage onStart={() => setShowAuth(true)} />;
 
   return (
     <div className="min-h-screen relative" style={{
