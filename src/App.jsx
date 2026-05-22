@@ -312,7 +312,7 @@ const ControlButtons = ({ isRunning, onStart, onFinalize }) => (
 // ============================================
 // BANNER DE PUBLICIDADE
 // ============================================
-const AdBanner = () => (
+const AdBanner = ({ src, href, alt = 'Publicidade' }) => {
   <div className="my-8 mx-auto flex items-center justify-center rounded-xl"
     style={{
       width: '100%', maxWidth: '728px', height: '90px',
