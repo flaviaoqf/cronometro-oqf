@@ -487,7 +487,6 @@ const Header = ({ activeTab, setActiveTab, user, onLogout }) => {
                 color: activeTab === tab ? COLORS.bluePremium : COLORS.silverSecondary,
                 borderBottom: activeTab === tab ? `2px solid ${COLORS.bluePremium}` : '2px solid transparent',
                 background: 'none', border: 'none',
-                borderBottom: activeTab === tab ? `2px solid ${COLORS.bluePremium}` : '2px solid transparent',
                 cursor: 'pointer', paddingBottom: '4px', fontSize: '13px', fontWeight: '500'
               }}>
               {tabLabels[tab]}
