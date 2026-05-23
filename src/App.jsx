@@ -11,7 +11,7 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const COLORS = {
-  black: '#030303',h
+  black: '#030303',
   blackSecondary: '#070708',
   grafite: '#111113',
   silverMain: '#D7D7D9',
