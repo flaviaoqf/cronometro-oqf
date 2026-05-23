@@ -312,18 +312,28 @@ const ControlButtons = ({ isRunning, onStart, onFinalize }) => (
 // ============================================
 // BANNER DE PUBLICIDADE
 // ============================================
-const AdBanner = ({ src, href, alt = 'Publicidade' }) => {
-    return (
-          <div style={{ width: '100%', maxWidth: '728px', margin: '12px auto', display: 'block' }}>
-                  <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
-                            <img
-                                        src={src}
-                                        alt={alt}
-                                        style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
-                                      />
-                  </a>
-          </div>
-        );
+const AdBanner = ({ srcDesktop, srcMobile, href, alt = 'Publicidade' }) => {
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth <= 768);
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  const currentSrc = isMobile && srcMobile ? srcMobile : srcDesktop;
+  const imgStyle = isMobile && srcMobile
+    ? { width: '100%', height: 'auto', objectFit: 'contain', borderRadius: '8px', display: 'block' }
+    : { width: '100%', height: '90px', objectFit: 'cover', borderRadius: '8px', display: 'block' };
+  return (
+    <div style={{ width: '100%', maxWidth: '728px', margin: '12px auto', display: 'block' }}>
+      <a href={href} target='_blank' rel='noopener noreferrer' style={{ display: 'block' }}>
+        <img
+          src={currentSrc}
+          alt={alt}
+          style={imgStyle}
+        />
+      </a>
+    </div>
+  );
 };
 // ============================================
 // ESTATÍSTICAS
@@ -719,9 +729,11 @@ export default function CronometroOQF() {
             <TimerDisplay seconds={seconds} isRunning={isRunning} />
             <SubjectInput subject={subject} setSubject={setSubject} />
             <ControlButtons isRunning={isRunning} onStart={handleStart} onFinalize={handleFinalize} />
-            <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/2banner%20grupo%20de%20alertas.png" href="https://oqueeufaria.com.br/grupo-de-alerta-o/?utm_source=app_cronometro_oqf&utm_medium=botao_grupo_alerta&utm_campaign=comunidade_oqf" alt="Grupo de Alertas OQF" />
+            <AdBanner srcDesktop="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/2banner%20grupo%20de%20alertas.png"
+  srcMobile="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%201%20Mobile%20%E2%80%94%20Grupo%20de%20Alertas%20OQF.png" href="https://oqueeufaria.com.br/grupo-de-alerta-o/?utm_source=app_cronometro_oqf&utm_medium=botao_grupo_alerta&utm_campaign=comunidade_oqf" alt="Grupo de Alertas OQF" />
             <StatisticsSection sessions={sessions} />
-            <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/1banner%20youtube.png" href="https://swiy.co/OQF-Youtube" alt="Canal OQF no YouTube" />
+            <AdBanner srcDesktop="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/1banner%20youtube.png"
+  srcMobile="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%202%20Mobile%20%E2%80%94%20Canal%20do%20YouTube%20OQF.png" href="https://swiy.co/OQF-Youtube" alt="Canal OQF no YouTube" />
             <SponsoredOffers />
             <RecentHistory sessions={sessions} />
           </>
@@ -732,7 +744,8 @@ export default function CronometroOQF() {
             <h2 className="text-3xl font-light mb-8" style={{ color: COLORS.white }}>Suas Estatísticas</h2>
             <StatisticsSection sessions={sessions} />
             <RecentHistory sessions={sessions} />
-                          <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/3banner%20guia%20de%20suplementa%C3%A7%C3%A3o.png" href="https://pay.kiwify.com.br/702CrGV?coupon=DESCONTOLIMITADO&utm_source=Insta&utm_medium=manychat&utm_campaign=venda" alt="Guia de Suplementação" />
+                          <AdBanner srcDesktop="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/3banner%20guia%20de%20suplementa%C3%A7%C3%A3o.png"
+  srcMobile="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%203%20Mobile%20%E2%80%94%20Guia%20de%20Suplementa%C3%A7%C3%A3o.png" href="https://pay.kiwify.com.br/702CrGV?coupon=DESCONTOLIMITADO&utm_source=Insta&utm_medium=manychat&utm_campaign=venda" alt="Guia de Suplementação" />
           </div>
         )}
 
