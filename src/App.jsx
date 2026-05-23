@@ -11,7 +11,7 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const COLORS = {
-  black: '#030303',
+  black: '#030303',h
   blackSecondary: '#070708',
   grafite: '#111113',
   silverMain: '#D7D7D9',
@@ -699,6 +699,7 @@ export default function CronometroOQF() {
   }
 
     if (!user && !showAuth) return <LandingPage onStart={() => setShowAuth(true)} />;
+    if (!user && showAuth) return <AuthScreen />;
 
   return (
     <div className="min-h-screen relative" style={{
