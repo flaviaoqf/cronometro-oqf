@@ -31,6 +31,8 @@ const AuthScreen = () => {
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [forgotEmail, setForgotEmail] = useState('');
 
   const handleChange = (e) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -82,6 +84,23 @@ const AuthScreen = () => {
       setLoading(false);
     }
   };
+
+    const handleForgotPassword = async (e) => {
+          e.preventDefault();
+          if (!forgotEmail) { setError('Digite seu e-mail.'); return; }
+          setLoading(true); setError(''); setSuccess('');
+          try {
+                  const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+                            redirectTo: window.location.origin
+                  });
+                  if (error) throw error;
+                  setSuccess('E-mail enviado! Verifique sua caixa de entrada para redefinir sua senha.');
+          } catch (err) {
+                  setError('Nao foi possivel enviar o e-mail. Verifique o endereco digitado.');
+          } finally {
+                  setLoading(false);
+          }
+    };
 
   const inputStyle = {
     width: '100%',
@@ -203,6 +222,29 @@ const AuthScreen = () => {
               {loading ? 'AGUARDE...' : mode === 'login' ? 'ENTRAR' : 'CRIAR MINHA CONTA'}
             </button>
           </form>
+
+          {mode === 'login' && !showForgotPassword && (
+                  <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                                  <button type="button" onClick={() => { setShowForgotPassword(true); setError(''); setSuccess(''); }}
+                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.bluePremium, fontSize: '13px' }}>
+                                                    Esqueci minha senha
+                                  </button>
+                  </div>
+                )}
+
+          {showForgotPassword && (
+                  <form onSubmit={handleForgotPassword} style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                  <p style={{ textAlign: 'center', fontSize: '13px', color: COLORS.silverSecondary, margin: 0 }}>Digite seu e-mail para receber o link de redefinicao de senha.</p>p>
+                                  <input type="email" placeholder="Seu e-mail" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required style={inputStyle}
+                                                    onFocus={(e) => e.target.style.borderColor = 'rgba(10,132,255,0.5)'} onBlur={(e) => e.target.style.borderColor = 'rgba(215,215,217,0.15)'} />
+                                  <button type="submit" disabled={loading} style={{ padding: '14px', borderRadius: '12px', fontWeight: '700', fontSize: '14px', background: loading ? 'rgba(10,132,255,0.4)' : COLORS.bluePremium, color: 'white', border: 'none', cursor: loading ? 'not-allowed' : 'pointer' }}>
+                                    {loading ? 'ENVIANDO...' : 'ENVIAR LINK DE REDEFINICAO'}
+                                  </button>
+                                  <button type="button" onClick={() => { setShowForgotPassword(false); setError(''); setSuccess(''); setForgotEmail(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.silverSecondary, fontSize: '13px', textAlign: 'center' }}>
+                                                    Voltar para o login
+                                  </button>
+                  </form>
+                )}
 
           {mode === 'register' && (
             <p style={{ textAlign: 'center', fontSize: '12px', marginTop: '20px', color: COLORS.silverSecondary }}>
