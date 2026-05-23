@@ -313,18 +313,17 @@ const ControlButtons = ({ isRunning, onStart, onFinalize }) => (
 // BANNER DE PUBLICIDADE
 // ============================================
 const AdBanner = ({ src, href, alt = 'Publicidade' }) => {
-  <div className="my-8 mx-auto flex items-center justify-center rounded-xl"
-    style={{
-      width: '100%', maxWidth: '728px', height: '90px',
-      background: 'rgba(7,7,8,0.4)', backdropFilter: 'blur(20px)',
-      border: '1px solid rgba(215,215,217,0.15)', color: COLORS.silverSecondary, fontSize: '14px'
-    }}>
-    <div className="text-center">
-      <div style={{ marginBottom: '4px' }}>📍</div>
-      <div><a href={href} target="_blank" rel="noopener noreferrer"><img src={src} alt={alt} style={{ width:'100%', maxWidth:'728px', height:'90px', objectFit:'cover', borderRadius:'8px', display:'block' }} /></a></div>
-      <div style={{ fontSize: '12px', marginTop: '4px' }}>728 x 90px</div>
-    </div>
-  </div>
+    return (
+          <div style={{ width: '100%', maxWidth: '728px', margin: '12px auto', display: 'block' }}>
+                  <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
+                            <img
+                                        src={src}
+                                        alt={alt}
+                                        style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                                      />
+                  </a>
+          </div>
+        );
 );
 
 // ============================================
