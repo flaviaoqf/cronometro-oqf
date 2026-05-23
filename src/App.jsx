@@ -724,7 +724,7 @@ export default function CronometroOQF() {
             <StatisticsSection sessions={sessions} />
             <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%202%20grupo%20de%20alertas.png" href="https://oqueeufaria.com.br/grupo-de-alerta-o/?utm_source=app_cronometro_oqf&utm_medium=botao_grupo_alerta&utm_campaign=comunidade_oqf" alt="Grupo de Alertas OQF" />
             <SponsoredOffers />
-            <RecentHistory sessions={sessions} /> />
+            <RecentHistory sessions={sessions} />
           </>
         )}
 
@@ -732,7 +732,8 @@ export default function CronometroOQF() {
           <div className="max-w-2xl mx-auto py-12">
             <h2 className="text-3xl font-light mb-8" style={{ color: COLORS.white }}>Suas Estatísticas</h2>
             <StatisticsSection sessions={sessions} />
-            <RecentHistory sessions={sessions} />              <a href="https://pay.kiwify.com.br/702CrGV?coupon=DESCONTOLIMITADO&utm_source=Insta&utm_medium=manychat&utm_campaign=venda" target="_blank" rel="noopener noreferrer" style={{ display:'block', width:'100%', maxWidth:'900px', margin:'16px auto 0' }}><img src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%203%20Guia%20de%20suplementa%C3%A7%C3%A3o.png" alt="Guia de Suplementação para Estudos" style={{ width:'100%', borderRadius:'10px', display:'block' }} /></a> />
+            <RecentHistory sessions={sessions} />
+                          <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%203%20Guia%20de%20suplementa%C3%A7%C3%A3o.png" href="https://pay.kiwify.com.br/702CrGV?coupon=DESCONTOLIMITADO&utm_source=Insta&utm_medium=manychat&utm_campaign=venda" alt="Guia de Suplementação" />
           </div>
         )}
 
