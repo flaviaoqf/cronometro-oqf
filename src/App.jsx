@@ -719,9 +719,9 @@ export default function CronometroOQF() {
             <TimerDisplay seconds={seconds} isRunning={isRunning} />
             <SubjectInput subject={subject} setSubject={setSubject} />
             <ControlButtons isRunning={isRunning} onStart={handleStart} onFinalize={handleFinalize} />
-            <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%201%20%20YOUTUBE.png" href="https://swiy.co/OQF-Youtube" alt="Canal OQF no YouTube" />
+            <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/2banner%20grupo%20de%20alertas.png" href="https://oqueeufaria.com.br/grupo-de-alerta-o/?utm_source=app_cronometro_oqf&utm_medium=botao_grupo_alerta&utm_campaign=comunidade_oqf" alt="Grupo de Alertas OQF" />
             <StatisticsSection sessions={sessions} />
-            <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%202%20grupo%20de%20alertas.png" href="https://oqueeufaria.com.br/grupo-de-alerta-o/?utm_source=app_cronometro_oqf&utm_medium=botao_grupo_alerta&utm_campaign=comunidade_oqf" alt="Grupo de Alertas OQF" />
+            <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/1banner%20youtube.png" href="https://swiy.co/OQF-Youtube" alt="Canal OQF no YouTube" />
             <SponsoredOffers />
             <RecentHistory sessions={sessions} />
           </>
@@ -732,7 +732,7 @@ export default function CronometroOQF() {
             <h2 className="text-3xl font-light mb-8" style={{ color: COLORS.white }}>Suas Estatísticas</h2>
             <StatisticsSection sessions={sessions} />
             <RecentHistory sessions={sessions} />
-                          <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%203%20Guia%20de%20suplementa%C3%A7%C3%A3o.png" href="https://pay.kiwify.com.br/702CrGV?coupon=DESCONTOLIMITADO&utm_source=Insta&utm_medium=manychat&utm_campaign=venda" alt="Guia de Suplementação" />
+                          <AdBanner src="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/3banner%20guia%20de%20suplementa%C3%A7%C3%A3o.png" href="https://pay.kiwify.com.br/702CrGV?coupon=DESCONTOLIMITADO&utm_source=Insta&utm_medium=manychat&utm_campaign=venda" alt="Guia de Suplementação" />
           </div>
         )}
 
