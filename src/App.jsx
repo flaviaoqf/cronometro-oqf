@@ -506,6 +506,56 @@ const RecentHistory = ({ sessions, showAll = false }) => {
 };
 
 // ============================================
+// ============================================
+// TELA DE REDEFINICAO DE SENHA
+// ============================================
+const ResetPasswordScreen = ({ onDone }) => {
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handleReset = async (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setError('As senhas nao coincidem.'); return;
+    }
+    if (newPassword.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres.'); return;
+    }
+    setLoading(true); setError('');
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    setLoading(false);
+    if (updateError) { setError('Erro ao redefinir senha. Tente novamente.'); return; }
+    setSuccess('Senha redefinida com sucesso!');
+    setTimeout(() => { onDone(); }, 2000);
+  };
+
+  const inputStyle = { width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid rgba(215,215,217,0.2)', background: 'rgba(255,255,255,0.05)', color: COLORS.white, fontSize: '14px', outline: 'none', boxSizing: 'border-box' };
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(135deg, ${COLORS.black} 0%, ${COLORS.blackSecondary} 100%)`, padding: '20px' }}>
+      <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '40px', width: '100%', maxWidth: '420px', border: '1px solid rgba(215,215,217,0.1)' }}>
+        <h2 style={{ color: COLORS.white, textAlign: 'center', marginBottom: '8px', fontSize: '22px' }}>Nova senha</h2>
+        <p style={{ color: COLORS.silverSecondary, textAlign: 'center', marginBottom: '24px', fontSize: '13px' }}>Digite e confirme sua nova senha</p>
+        {success ? (
+          <p style={{ color: COLORS.bluePremium, textAlign: 'center', fontWeight: '600' }}>{success}</p>
+        ) : (
+          <form onSubmit={handleReset} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <input type="password" placeholder="Nova senha" value={newPassword} onChange={e => setNewPassword(e.target.value)} required style={inputStyle} />
+            <input type="password" placeholder="Confirmar nova senha" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required style={inputStyle} />
+            {error && <p style={{ color: '#ff6b6b', fontSize: '12px', textAlign: 'center' }}>{error}</p>}
+            <button type="submit" disabled={loading} style={{ padding: '14px', borderRadius: '10px', background: COLORS.bluePremium, color: COLORS.white, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: '700', fontSize: '14px' }}>
+              {loading ? 'SALVANDO...' : 'SALVAR NOVA SENHA'}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // HEADER
 // ============================================
 const Header = ({ activeTab, setActiveTab, user, onLogout }) => {
@@ -599,6 +649,7 @@ const Header = ({ activeTab, setActiveTab, user, onLogout }) => {
 export default function CronometroOQF() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -619,9 +670,13 @@ export default function CronometroOQF() {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          setIsPasswordRecovery(true);
+        } else {
+          setUser(session?.user ?? null);
+        }
+      });
     return () => subscription.unsubscribe();
   }, []);
 
@@ -741,6 +796,7 @@ export default function CronometroOQF() {
   }
 
     if (!user && !showAuth) return <LandingPage onStart={() => setShowAuth(true)} />;
+    if (isPasswordRecovery) return <ResetPasswordScreen onDone={() => setIsPasswordRecovery(false)} />;
     if (!user && showAuth) return <AuthScreen />;
 
   return (
