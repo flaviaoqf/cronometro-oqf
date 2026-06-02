@@ -395,7 +395,7 @@ const WeeklyChart = ({ sessions }) => {
   const toHours = (s) => s >= 3600 ? (s/3600).toFixed(1) + 'h' : Math.floor(s/60) + 'm';
   return (
     <div style={{ marginBottom: '28px' }}>
-      <p style={{ color: COLORS.silverSecondary, fontSize: '12px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Semana atual — horas por dia</p>
+      <h3 className="mb-6 font-medium tracking-wide" style={{ color: COLORS.silverMain }}>SEMANA ATUAL — HORAS POR DIA</h3>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '110px' }}>
         {daily.map((val, i) => (
           <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
@@ -436,7 +436,7 @@ const MonthlyChart = ({ sessions }) => {
   const todayPt = pts[now.getDate() - 1];
   return (
     <div style={{ marginBottom: '28px' }}>
-      <p style={{ color: COLORS.silverSecondary, fontSize: '12px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Mês atual — horas por dia</p>
+      <h3 className="mb-6 font-medium tracking-wide" style={{ color: COLORS.silverMain }}>MÊS ATUAL — HORAS POR DIA</h3>
       <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: '110px', display: 'block' }}>
         <defs><linearGradient id="mgGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={COLORS.bluePremium} stopOpacity="0.35" /><stop offset="100%" stopColor={COLORS.bluePremium} stopOpacity="0.02" /></linearGradient></defs>
         <path d={areaD} fill="url(#mgGrad)" />
@@ -452,7 +452,7 @@ const MonthlyChart = ({ sessions }) => {
 
 // ESTATÍSTICAS
 // ============================================
-const StatisticsSection = ({ sessions }) => {
+const StatisticsSection = ({ sessions, showCharts = false }) => {
   const totalSeconds = sessions.reduce((acc, s) => acc + (s.duration_seconds || 0), 0);
   const totalHours = `${Math.floor(totalSeconds / 3600)}h ${Math.floor((totalSeconds % 3600) / 60)}m`;
   const avgMin = sessions.length > 0 ? Math.floor((totalSeconds / sessions.length) / 60) : 0;
@@ -481,8 +481,8 @@ const StatisticsSection = ({ sessions }) => {
         <StatCard icon={Clock} label="TEMPO TOTAL" value={totalHours} sub="Horas estudadas" />
         <StatCard icon={Flame} label="MÉDIA POR SESSÃO" value={averageDaily} sub={`${sessions.length} sessões registradas`} />
       </div>
-      <WeeklyChart sessions={sessions} />
-      <MonthlyChart sessions={sessions} />
+      {showCharts && <WeeklyChart sessions={sessions} />}
+      {showCharts && <MonthlyChart sessions={sessions} />}
     </div>
   );
 };
@@ -544,7 +544,7 @@ const RecentHistory = ({ sessions, showAll = false }) => {
   const displayed = showAll ? sessions : sessions.slice(0, 5);
   return (
     <div className="max-w-2xl mx-auto px-4 mb-12">
-      <h3 className="mb-4 font-medium tracking-wide" style={{ color: COLORS.silverMain }}>HISTÓRICO RECENTE</h3>
+      <h3 className="mb-6 font-medium tracking-wide" style={{ color: COLORS.silverMain }}>HISTÓRICO RECENTE</h3>
       {displayed.length === 0 ? (
         <p style={{ color: COLORS.silverSecondary, fontSize: '14px' }}>Nenhuma sessão registrada ainda.</p>
       ) : (
@@ -899,7 +899,7 @@ export default function CronometroOQF() {
         {activeTab === 'estatísticas' && (
           <div className="max-w-2xl mx-auto py-12">
             <h2 className="text-3xl font-light mb-8" style={{ color: COLORS.white }}>Suas Estatísticas</h2>
-            <StatisticsSection sessions={sessions} />
+        <StatisticsSection sessions={sessions} showCharts={true} />
             <RecentHistory sessions={sessions} />
                           <AdBanner srcDesktop="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/3banner%20guia%20de%20suplementa%C3%A7%C3%A3o.png"
   srcMobile="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%203%20Mobile%20%E2%80%94%20Guia%20de%20Suplementa%C3%A7%C3%A3o.png" href="https://pay.kiwify.com.br/702CrGV?coupon=DESCONTOLIMITADO&utm_source=Insta&utm_medium=manychat&utm_campaign=venda" alt="Guia de Suplementação" />
