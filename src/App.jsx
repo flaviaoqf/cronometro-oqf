@@ -378,6 +378,78 @@ const AdBanner = ({ srcDesktop, srcMobile, href, alt = 'Publicidade' }) => {
   );
 };
 // ============================================
+// GRÁFICO SEMANAL
+const WeeklyChart = ({ sessions }) => {
+  const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+  const daily = Array(7).fill(0);
+  sessions.forEach(s => {
+    const d = new Date(s.started_at || s.created_at);
+    const dayDiff = Math.floor((d - startOfWeek) / 86400000);
+    if (dayDiff >= 0 && dayDiff < 7) daily[dayDiff] += (s.duration_seconds || 0);
+  });
+  const maxVal = Math.max(...daily, 1);
+  const toHours = (s) => s >= 3600 ? (s/3600).toFixed(1) + 'h' : Math.floor(s/60) + 'm';
+  return (
+    <div style={{ marginBottom: '28px' }}>
+      <p style={{ color: COLORS.silverSecondary, fontSize: '12px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Semana atual — horas por dia</p>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '110px' }}>
+        {daily.map((val, i) => (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+            <div style={{ fontSize: '10px', color: COLORS.silverSecondary, marginBottom: '3px', minHeight: '14px' }}>{val > 0 ? toHours(val) : ''}</div>
+            <div style={{ width: '100%', height: Math.max(Math.round((val / maxVal) * 80), val > 0 ? 3 : 0) + 'px', background: i === now.getDay() ? COLORS.bluePremium : 'rgba(74,144,226,0.35)', borderRadius: '4px 4px 0 0', minHeight: val > 0 ? '3px' : '0px' }} />
+            <div style={{ fontSize: '11px', color: i === now.getDay() ? COLORS.white : COLORS.silverSecondary, marginTop: '5px', fontWeight: i === now.getDay() ? '600' : '400' }}>{days[i]}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// GRÁFICO MENSAL
+const MonthlyChart = ({ sessions }) => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daily = Array(daysInMonth).fill(0);
+  sessions.forEach(s => {
+    const d = new Date(s.started_at || s.created_at);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      daily[d.getDate() - 1] += (s.duration_seconds || 0);
+    }
+  });
+  const maxVal = Math.max(...daily, 1);
+  const w = 520, h = 90, padL = 28, padR = 8, padT = 8, padB = 22;
+  const chartW = w - padL - padR;
+  const chartH = h - padT - padB;
+  const toHours = (s) => (s / 3600).toFixed(1);
+  const pts = daily.map((val, i) => ({
+    x: padL + (daysInMonth > 1 ? (i / (daysInMonth - 1)) * chartW : chartW / 2),
+    y: padT + chartH - (val / maxVal) * chartH
+  }));
+  const pathD = pts.map((p, i) => (i === 0 ? `M${p.x.toFixed(1)},${p.y.toFixed(1)}` : `L${p.x.toFixed(1)},${p.y.toFixed(1)}`)).join(' ');
+  const areaD = pathD + ` L${pts[pts.length-1].x.toFixed(1)},${(padT+chartH).toFixed(1)} L${padL},${(padT+chartH).toFixed(1)} Z`;
+  const todayPt = pts[now.getDate() - 1];
+  return (
+    <div style={{ marginBottom: '28px' }}>
+      <p style={{ color: COLORS.silverSecondary, fontSize: '12px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Mês atual — horas por dia</p>
+      <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: '110px', display: 'block' }}>
+        <defs><linearGradient id="mgGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={COLORS.bluePremium} stopOpacity="0.35" /><stop offset="100%" stopColor={COLORS.bluePremium} stopOpacity="0.02" /></linearGradient></defs>
+        <path d={areaD} fill="url(#mgGrad)" />
+        <path d={pathD} fill="none" stroke={COLORS.bluePremium} strokeWidth="1.8" strokeLinejoin="round" />
+        {todayPt && <circle cx={todayPt.x.toFixed(1)} cy={todayPt.y.toFixed(1)} r="3.5" fill={COLORS.bluePremium} />}
+        {[0, 6, 13, 20, daysInMonth-1].map(d => (<text key={d} x={(padL + (daysInMonth > 1 ? (d/(daysInMonth-1))*chartW : chartW/2)).toFixed(1)} y={h-3} fontSize="9" fill={COLORS.silverSecondary} textAnchor="middle">{d+1}</text>))}
+        <text x={padL-4} y={padT+8} fontSize="9" fill={COLORS.silverSecondary} textAnchor="end">{toHours(maxVal)}h</text>
+      </svg>
+    </div>
+  );
+};
+
+
 // ESTATÍSTICAS
 // ============================================
 const StatisticsSection = ({ sessions }) => {
@@ -409,6 +481,8 @@ const StatisticsSection = ({ sessions }) => {
         <StatCard icon={Clock} label="TEMPO TOTAL" value={totalHours} sub="Horas estudadas" />
         <StatCard icon={Flame} label="MÉDIA POR SESSÃO" value={averageDaily} sub={`${sessions.length} sessões registradas`} />
       </div>
+      <WeeklyChart sessions={sessions} />
+      <MonthlyChart sessions={sessions} />
     </div>
   );
 };
@@ -455,50 +529,35 @@ const SponsoredOffers = () => {
 // ============================================
 // HISTÓRICO
 // ============================================
+// HISTÓRICO
+// ==========================================
 const RecentHistory = ({ sessions, showAll = false }) => {
-  const fmt = (n) => String(n).padStart(2, '0');
-  const fmtDuration = (s) => `${fmt(Math.floor(s/3600))}:${fmt(Math.floor((s%3600)/60))}:${fmt(s%60)}`;
-  const fmtDate = (d) => new Date(d).toLocaleDateString('pt-BR');
-  const fmtTime = (d) => new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const fmtDuration = (s) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    if (h > 0 && m > 0) return `${h}h${m}min estudados`;
+    if (h > 0) return `${h}h estudadas`;
+    if (m > 0) return `${m} min estudados`;
+    return 'menos de 1 min';
+  };
+  const fmtDate = (d) => new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const displayed = showAll ? sessions : sessions.slice(0, 5);
-
   return (
     <div className="max-w-2xl mx-auto px-4 mb-12">
-      <h3 className="mb-6 font-medium tracking-wide" style={{ color: COLORS.silverMain }}>
-        {showAll ? 'HISTÓRICO COMPLETO' : 'HISTÓRICO RECENTE'}
-      </h3>
-      {sessions.length === 0 ? (
-        <div className="rounded-2xl p-8 text-center" style={{
-          background: 'rgba(7,7,8,0.4)', border: '1px solid rgba(215,215,217,0.12)', color: COLORS.silverSecondary
-        }}>
-          Nenhuma sessão registrada ainda. Inicie seu primeiro cronômetro!
-        </div>
+      <h3 className="mb-4 font-medium tracking-wide" style={{ color: COLORS.silverMain }}>HISTÓRICO RECENTE</h3>
+      {displayed.length === 0 ? (
+        <p style={{ color: COLORS.silverSecondary, fontSize: '14px' }}>Nenhuma sessão registrada ainda.</p>
       ) : (
-        <div className="rounded-2xl overflow-hidden" style={{
-          background: 'rgba(7,7,8,0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(215,215,217,0.12)'
-        }}>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(215,215,217,0.12)' }}>
-                  {['DATA', 'ASSUNTO', 'TEMPO', 'INÍCIO', 'FIM'].map(h => (
-                    <th key={h} className="px-6 py-4 text-left font-medium" style={{ color: COLORS.silverSecondary }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {displayed.map((s, i) => (
-                  <tr key={i} style={{ borderBottom: i < displayed.length - 1 ? '1px solid rgba(215,215,217,0.08)' : 'none' }}>
-                    <td className="px-6 py-4" style={{ color: COLORS.white }}>{fmtDate(s.started_at)}</td>
-                    <td className="px-6 py-4" style={{ color: COLORS.white }}>{s.subject || '—'}</td>
-                    <td className="px-6 py-4" style={{ color: COLORS.white }}>{fmtDuration(s.duration_seconds)}</td>
-                    <td className="px-6 py-4" style={{ color: COLORS.silverSecondary }}>{fmtTime(s.started_at)}</td>
-                    <td className="px-6 py-4" style={{ color: COLORS.silverSecondary }}>{fmtTime(s.ended_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {displayed.map((s, i) => (
+            <div key={i} style={{ background: 'rgba(17,17,19,0.5)', border: '1px solid rgba(215,215,217,0.10)', borderRadius: '12px', padding: '14px 18px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                <span style={{ color: COLORS.white, fontWeight: '500', fontSize: '15px' }}>{s.subject || 'Sem título'}</span>
+                <span style={{ color: COLORS.bluePremium, fontWeight: '600', fontSize: '14px' }}>{fmtDuration(s.duration_seconds || 0)}</span>
+              </div>
+              <div style={{ color: COLORS.silverSecondary, fontSize: '12px', marginTop: '4px' }}>{fmtDate(s.started_at || s.created_at)}</div>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -702,7 +761,7 @@ export default function CronometroOQF() {
         setSeconds(s + elapsed);
         setStartedAt(sa);
         setSubject(sub || '');
-        setShowSessionRecovery(true);
+        setIsRunning(true); // retoma automaticamente, sem popup
       } else {
         setSeconds(s || 0);
         setSubject(sub || '');
@@ -855,32 +914,6 @@ export default function CronometroOQF() {
         )}
       </main>
 
-      {/* Modal recuperação de sessão */}
-      {showSessionRecovery && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}>
-          <div className="rounded-2xl p-8 max-w-md w-full" style={{
-            background: 'rgba(7,7,8,0.95)', backdropFilter: 'blur(30px)',
-            border: '1px solid rgba(215,215,217,0.2)'
-          }}>
-            <h3 className="text-xl font-light mb-2" style={{ color: COLORS.white }}>Continuar Sessão?</h3>
-            <p className="mb-6" style={{ color: COLORS.silverSecondary }}>
-              Detectamos uma sessão em andamento. Deseja continuar de onde parou?
-            </p>
-            <div className="flex gap-3">
-              <button onClick={handleDiscardSession} style={{
-                flex: 1, padding: '12px', borderRadius: '10px', fontWeight: '500',
-                background: 'transparent', border: '1px solid rgba(215,215,217,0.2)',
-                color: COLORS.silverSecondary, cursor: 'pointer'
-              }}>Descartar</button>
-              <button onClick={handleResumeSession} style={{
-                flex: 1, padding: '12px', borderRadius: '10px', fontWeight: '500',
-                background: COLORS.bluePremium, color: 'white', border: 'none', cursor: 'pointer'
-              }}>Continuar</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Toast */}
       {toast && (
