@@ -777,12 +777,12 @@ export default function CronometroOQF() {
   // Ticker do timer
   useEffect(() => {
     if (isRunning) {
-      timerRef.current = setInterval(() => setSeconds(p => p + 1), 1000);
+      timerRef.current = setInterval(() => { if (startedAt) setSeconds(Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)); }, 500);
     } else {
       clearInterval(timerRef.current);
     }
     return () => clearInterval(timerRef.current);
-  }, [isRunning]);
+  }, [isRunning, startedAt]);
 
   const showToast = (message, type = 'info') => {
     setToast({ message, type });
