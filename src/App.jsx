@@ -889,7 +889,7 @@ export default function CronometroOQF() {
             <AdBanner srcDesktop="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/2banner%20grupo%20de%20alertas.png"
   srcMobile="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%201%20Mobile%20%E2%80%94%20Grupo%20de%20Alertas%20OQF.png" href="https://oqueeufaria.com.br/grupo-de-alerta-o/?utm_source=app_cronometro_oqf&utm_medium=botao_grupo_alerta&utm_campaign=comunidade_oqf" alt="Grupo de Alertas OQF" />
             <StatisticsSection sessions={sessions} />
-            <div className="hidden md:block"><AdBanner srcDesktop="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/720%20x%2090%20-CANAL%20YOUTUBE%20-%20DENTRO%20DO%20cronometro.png" href="https://swiy.co/OQF-Youtube" alt="Canal OQF no YouTube" /></div>
+            <div className="hidden md:block"><AdBanner srcDesktop="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/(2)%20-%20quinta%20-%20720%20x%2090%20-CANAL%20YOUTUBE%20-%20DENTRO%20DO%20cronometro.png.png" href="https://swiy.co/OQF-Youtube" alt="Canal OQF no YouTube" /></div>
             <SponsoredOffers />
             <RecentHistory sessions={sessions} />
           </>
