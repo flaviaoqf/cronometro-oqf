@@ -352,6 +352,85 @@ const ControlButtons = ({ isRunning, onStart, onFinalize }) => (
 );
 
 // ============================================
+// MODO FLUTUANTE (Picture-in-Picture) - opcional, ativado pelo usuário
+// ============================================
+const FloatingTimerButton = ({ seconds, subject, isRunning }) => {
+  const [supported, setSupported] = React.useState(false);
+  const [active, setActive] = React.useState(false);
+  const pipWindowRef = React.useRef(null);
+  const elsRef = React.useRef(null);
+
+  React.useEffect(() => {
+    setSupported(typeof window !== 'undefined' && 'documentPictureInPicture' in window);
+  }, []);
+
+  React.useEffect(() => {
+    if (active && elsRef.current) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      const fmt = (n) => String(n).padStart(2, '0');
+      elsRef.current.timeEl.textContent = fmt(h) + ':' + fmt(m) + ':' + fmt(s);
+      elsRef.current.subjectEl.textContent = subject || 'Sem matéria definida';
+    }
+  }, [seconds, subject, active]);
+
+  const closePip = () => {
+    if (pipWindowRef.current) {
+      try { pipWindowRef.current.close(); } catch (e) {}
+    }
+    pipWindowRef.current = null;
+    elsRef.current = null;
+    setActive(false);
+  };
+
+  const openPip = async () => {
+    try {
+      const pipWindow = await window.documentPictureInPicture.requestWindow({ width: 280, height: 150 });
+      pipWindowRef.current = pipWindow;
+      const style = pipWindow.document.createElement('style');
+      style.textContent = 'body{margin:0;background:#030303;color:#F8FAFC;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;text-align:center;padding:8px;box-sizing:border-box;} .oqf-subject{font-size:13px;opacity:0.7;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;} .oqf-time{font-size:34px;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums;}';
+      pipWindow.document.head.appendChild(style);
+      const subjectEl = pipWindow.document.createElement('div');
+      subjectEl.className = 'oqf-subject';
+      const timeEl = pipWindow.document.createElement('div');
+      timeEl.className = 'oqf-time';
+      pipWindow.document.body.appendChild(subjectEl);
+      pipWindow.document.body.appendChild(timeEl);
+      elsRef.current = { subjectEl, timeEl };
+      pipWindow.addEventListener('pagehide', () => {
+        pipWindowRef.current = null;
+        elsRef.current = null;
+        setActive(false);
+      });
+      setActive(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggle = () => {
+    if (active) {
+      closePip();
+    } else {
+      openPip();
+    }
+  };
+
+  if (!supported) return null;
+
+  return (
+    <div className="flex justify-center mb-8 px-4">
+      <button onClick={handleToggle}
+        className="py-2 px-5 rounded-xl font-medium text-sm flex items-center justify-center gap-2"
+        style={{ background: 'transparent', color: COLORS.silverSecondary, border: '1px solid rgba(215,215,217,0.2)', cursor: 'pointer' }}>
+        {active ? 'Fechar modo flutuante' : 'Ativar modo flutuante ⧉'}
+      </button>
+    </div>
+  );
+};
+
+// ============================================
 // BANNER DE PUBLICIDADE
 // ============================================
 const AdBanner = ({ srcDesktop, srcMobile, href, alt = 'Publicidade' }) => {
@@ -714,6 +793,7 @@ export default function CronometroOQF() {
   const [isRunning, setIsRunning] = useState(false);
   const [subject, setSubject] = useState('');
   const [startedAt, setStartedAt] = useState(null);
+  const [baseSeconds, setBaseSeconds] = useState(0);
   const [sessions, setSessions] = useState([]);
   const [activeTab, setActiveTab] = useState('cronômetro');
   const [showSessionRecovery, setShowSessionRecovery] = useState(false);
@@ -752,37 +832,77 @@ export default function CronometroOQF() {
 
     loadSessions();
 
-    // Recuperar timer salvo localmente
+    // Recuperar timer salvo localmente (baseado em timestamp, sem duplicar o tempo)
     const savedState = localStorage.getItem('oqf_timer_state');
     if (savedState) {
-      const { seconds: s, startedAt: sa, subject: sub, isRunning: was } = JSON.parse(savedState);
-      if (was && s > 0) {
+      const { seconds: s, baseSeconds: bs, startedAt: sa, subject: sub, isRunning: was } = JSON.parse(savedState);
+      const base = typeof bs === 'number' ? bs : (s || 0);
+      if (was && sa) {
         const elapsed = Math.floor((Date.now() - new Date(sa).getTime()) / 1000);
-        setSeconds(s + elapsed);
+        setSeconds(base + elapsed);
+        setBaseSeconds(base);
         setStartedAt(sa);
         setSubject(sub || '');
-        setIsRunning(true); // retoma automaticamente, sem popup
+        setIsRunning(true);
+        // retoma automaticamente, sem popup
       } else {
         setSeconds(s || 0);
+        setBaseSeconds(s || 0);
         setSubject(sub || '');
       }
     }
   }, [user]);
 
+  // Sincronizar matéria, tempo e estado entre abas/janelas em tempo real
+  useEffect(() => {
+    const handleStorageSync = (e) => {
+      if (e.key !== 'oqf_timer_state' || !e.newValue) return;
+      try {
+        const { seconds: s, baseSeconds: bs, startedAt: sa, subject: sub, isRunning: was } = JSON.parse(e.newValue);
+        const base = typeof bs === 'number' ? bs : (s || 0);
+        setSubject(sub || '');
+        setIsRunning(!!was);
+        setStartedAt(sa || null);
+        setBaseSeconds(base);
+        setSeconds(was && sa ? base + Math.floor((Date.now() - new Date(sa).getTime()) / 1000) : (s || 0));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    window.addEventListener('storage', handleStorageSync);
+    return () => window.removeEventListener('storage', handleStorageSync);
+  }, []);
+
   // Salvar estado do timer localmente
   useEffect(() => {
-    localStorage.setItem('oqf_timer_state', JSON.stringify({ seconds, startedAt, subject, isRunning }));
-  }, [seconds, startedAt, subject, isRunning]);
+    localStorage.setItem('oqf_timer_state', JSON.stringify({ seconds, baseSeconds, startedAt, subject, isRunning }));
+  }, [seconds, baseSeconds, startedAt, subject, isRunning]);
 
-  // Ticker do timer
+  // Ticker do timer - sempre recalcula a partir do timestamp de início,
+  // então continua correto mesmo se o navegador pausar o setInterval em segundo plano
   useEffect(() => {
+    const tick = () => {
+      if (startedAt) setSeconds(baseSeconds + Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
+    };
     if (isRunning) {
-      timerRef.current = setInterval(() => { if (startedAt) setSeconds(Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)); }, 500);
+      tick();
+      timerRef.current = setInterval(tick, 1000);
     } else {
       clearInterval(timerRef.current);
     }
     return () => clearInterval(timerRef.current);
-  }, [isRunning, startedAt]);
+  }, [isRunning, startedAt, baseSeconds]);
+
+  // Recalcula imediatamente ao voltar de segundo plano/tela bloqueada
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && isRunning && startedAt) {
+        setSeconds(baseSeconds + Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [isRunning, startedAt, baseSeconds]);
 
   const showToast = (message, type = 'info') => {
     setToast({ message, type });
@@ -790,7 +910,11 @@ export default function CronometroOQF() {
   };
 
   const handleStart = () => {
-    if (!isRunning && !startedAt) setStartedAt(new Date().toISOString());
+    if (!isRunning) {
+      // Início ou retomada: nova "corrida" a partir do tempo já acumulado
+      setBaseSeconds(seconds);
+      setStartedAt(new Date().toISOString());
+    }
     setIsRunning(p => !p);
   };
 
@@ -819,6 +943,7 @@ export default function CronometroOQF() {
     setIsRunning(false);
     setSubject('');
     setStartedAt(null);
+    setBaseSeconds(0);
     setShowSessionRecovery(false);
     localStorage.removeItem('oqf_timer_state');
   };
@@ -829,12 +954,14 @@ export default function CronometroOQF() {
     setIsRunning(false);
     setSubject('');
     setStartedAt(null);
+    setBaseSeconds(0);
     localStorage.removeItem('oqf_timer_state');
   };
 
   const handleResumeSession = () => { setShowSessionRecovery(false); setIsRunning(true); };
   const handleDiscardSession = () => {
     setSeconds(0); setIsRunning(false); setSubject(''); setStartedAt(null);
+    setBaseSeconds(0);
     setShowSessionRecovery(false);
     localStorage.removeItem('oqf_timer_state');
   };
@@ -886,6 +1013,7 @@ export default function CronometroOQF() {
             <TimerDisplay seconds={seconds} isRunning={isRunning} />
             <SubjectInput subject={subject} setSubject={setSubject} />
             <ControlButtons isRunning={isRunning} onStart={handleStart} onFinalize={handleFinalize} />
+            <FloatingTimerButton seconds={seconds} subject={subject} isRunning={isRunning} />
             <AdBanner srcDesktop="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/2banner%20grupo%20de%20alertas.png"
   srcMobile="https://pub-b5f060815c0c4e05a1806ddd0c75d138.r2.dev/Banner%201%20Mobile%20%E2%80%94%20Grupo%20de%20Alertas%20OQF.png" href="https://oqueeufaria.com.br/grupo-de-alerta-o/?utm_source=app_cronometro_oqf&utm_medium=botao_grupo_alerta&utm_campaign=comunidade_oqf" alt="Grupo de Alertas OQF" />
             <StatisticsSection sessions={sessions} />
